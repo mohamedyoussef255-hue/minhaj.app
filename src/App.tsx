@@ -60,6 +60,11 @@ import {
   Info,
   X,
   Library,
+  Settings,
+  Mail,
+  KeyRound,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import {
   SUPPORTED_LANGUAGES,
@@ -276,11 +281,13 @@ export default function App() {
     }
   };
 
-  // Secret Admin Access Mechanism (5 Clicks on Logo)
+  // Admin & Control Panel Access (أيقونة تروس الإعدادات للإدارة ولوحة التحكم)
   const [logoClicks, setLogoClicks] = useState(0);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
-  const [secretPassword, setSecretPassword] = useState('000000');
+  const [secretPassword, setSecretPassword] = useState('mohamed2072');
+  const [adminEmailInput, setAdminEmailInput] = useState('');
   const [adminPasswordInput, setAdminPasswordInput] = useState('');
+  const [showAdminPassword, setShowAdminPassword] = useState(false);
   const [adminModalOpen, setAdminModalOpen] = useState(false);
   const [adminError, setAdminError] = useState<string | null>(null);
 
@@ -473,11 +480,28 @@ export default function App() {
     if (e) e.preventDefault();
     setAdminError(null);
 
+    const email = adminEmailInput.trim().toLowerCase();
+    const password = adminPasswordInput.trim();
+
+    if (!email) {
+      setAdminError('يرجى إدخال البريد الإلكتروني المعتمد للمشرف.');
+      return;
+    }
+    if (!password) {
+      setAdminError('يرجى إدخال كلمة المرور الإدارية.');
+      return;
+    }
+
+    if (email !== 'mohamedyoussef255@gmail.com' || password !== 'mohamed2072') {
+      setAdminError('❌ بيانات الدخول غير صحيحة! الدخول مخصص حصرياً للمشرف عبر البريد: mohamedyoussef255@gmail.com وكلمة المرور المحددة.');
+      return;
+    }
+
     try {
       const res = await fetch('/api/v1/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: adminPasswordInput }),
+        body: JSON.stringify({ email, password }),
       });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -486,12 +510,12 @@ export default function App() {
         setAdminModalOpen(false);
         setAdminPasswordInput('');
         setView('admin');
-        loadAdminData(adminPasswordInput);
+        loadAdminData(password);
       } else {
-        setAdminError(data.error || 'رمز الحماية غير صحيح!');
+        setAdminError(data.error || 'فشل التحقق من بيانات الدخول الإدارية.');
       }
     } catch {
-      setAdminError('فشل الاتصال بالخادم');
+      setAdminError('فشل الاتصال بالخادم، يرجى إعادة المحاولة.');
     }
   };
 
@@ -1379,6 +1403,37 @@ export default function App() {
                 {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
               </button>
 
+              {/* ⚙️ Admin Control Panel Trigger Button (أيقونة تروس الإعدادات للإدارة ولوحة التحكم) */}
+              <button
+                id="header-admin-cog-btn"
+                type="button"
+                onClick={() => {
+                  if (isAdminLoggedIn) {
+                    setView('admin');
+                    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
+                  } else {
+                    setAdminModalOpen(true);
+                  }
+                }}
+                className={`p-1.5 sm:p-2 rounded-xl border transition-all duration-200 group flex items-center gap-1.5 ${
+                  isAdminLoggedIn
+                    ? 'bg-amber-500 text-stone-950 border-amber-400 font-bold shadow-md'
+                    : isDark
+                    ? 'bg-[#0b212c] border-[#164e63] text-amber-400 hover:bg-[#0e2c3b] hover:border-amber-400/60'
+                    : 'bg-white border-[#cde2ec] text-[#0c3e54] hover:text-amber-600 hover:bg-[#f0f7fa] shadow-sm'
+                }`}
+                title="لوحة الإدارة والتحكم (للمشرف العام)"
+                aria-label="لوحة الإدارة والتحكم"
+              >
+                <Settings className={`w-4 h-4 text-amber-400 transition-transform duration-500 ${isAdminLoggedIn ? 'animate-spin [animation-duration:10s]' : 'group-hover:rotate-90'}`} />
+                <span className="text-[11px] font-bold hidden md:inline">
+                  {isAdminLoggedIn ? 'لوحة الإدارة' : 'الإدارة'}
+                </span>
+                {isAdminLoggedIn && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                )}
+              </button>
+
               {/* 🌐 Language Switcher Button (أيقونة تغيير اللغة) */}
               <button
                 id="header-language-btn"
@@ -1500,7 +1555,7 @@ export default function App() {
             { id: 'incentives', label: t('navIncentives'), icon: Coins },
             { id: 'references', label: t('navReferences'), icon: Library },
             { id: 'wallet', label: t('navWallet'), icon: WalletIcon },
-            ...(isAdminLoggedIn ? [{ id: 'admin', label: t('navAdmin'), icon: Lock }] : []),
+            { id: 'admin', label: 'لوحة التحكم', icon: Settings },
           ].map((item) => {
             const Icon = item.icon;
             const isActive = view === item.id;
@@ -1509,7 +1564,15 @@ export default function App() {
                 key={item.id}
                 id={`icon-nav-tab-${item.id}`}
                 onClick={() => {
-                  setView(item.id as any);
+                  if (item.id === 'admin') {
+                    if (isAdminLoggedIn) {
+                      setView('admin');
+                    } else {
+                      setAdminModalOpen(true);
+                    }
+                  } else {
+                    setView(item.id as any);
+                  }
                   if (typeof window !== 'undefined') {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }
@@ -2214,11 +2277,23 @@ export default function App() {
               {/* Admin Banner */}
               <div className="bg-stone-950 p-5 rounded-2xl border border-amber-500/40 shadow-2xl space-y-3">
                 <div className="flex items-center justify-between flex-wrap gap-2">
-                  <div className="flex items-center gap-2">
-                    <Lock className="w-5 h-5 text-amber-400" />
-                    <h2 className="font-black text-amber-400 text-sm">
-                      لوحة الإدارة المركزية والتحكم الأمني (Minhaj Admin Portal)
-                    </h2>
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                      <Settings className="w-5 h-5 animate-spin [animation-duration:16s]" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h2 className="font-black text-amber-400 text-sm">
+                          لوحة الإدارة والتحكم المركزية (Minhaj Admin Portal)
+                        </h2>
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-700 text-emerald-300 text-[10px] font-bold">
+                          المشرف العام المعتمد
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-stone-400 font-mono mt-0.5">
+                        الحساب النشط: <strong className="text-amber-300">mohamedyoussef255@gmail.com</strong>
+                      </p>
+                    </div>
                   </div>
                   <div className="flex items-center gap-2">
                     {/* Clear Demo Data Button */}
@@ -2237,9 +2312,9 @@ export default function App() {
                         setIsAdminLoggedIn(false);
                         setView('quran');
                       }}
-                      className="text-xs text-stone-400 hover:text-stone-200 bg-stone-900 px-3 py-1.5 rounded-lg border border-stone-800"
+                      className="text-xs text-stone-300 hover:text-white bg-stone-900 hover:bg-stone-800 px-3 py-1.5 rounded-lg border border-stone-700 font-bold transition-colors"
                     >
-                      تسجيل الخروج
+                      تسجيل الخروج من الإدارة
                     </button>
                   </div>
                 </div>
@@ -3513,54 +3588,128 @@ export default function App() {
         )}
 
         {/* ========================================================================= */}
-        {/* MODAL 3: SECRET ADMIN LOGIN DOOR (بوابة المدير السري)                       */}
+        {/* MODAL 3: ADMIN & CONTROL PANEL LOGIN (دخول الإدارة ولوحة التحكم)           */}
         {/* ========================================================================= */}
         {adminModalOpen && (
           <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-stone-900 w-full max-w-sm rounded-2xl border border-amber-500/50 shadow-2xl p-5 space-y-4 animate-in zoom-in-95 duration-150 text-xs">
-              <div className="flex items-center justify-between border-b border-stone-800 pb-2">
-                <div className="flex items-center gap-2 text-amber-400 font-bold text-sm">
-                  <Lock className="w-4 h-4" />
-                  <span>البوابة السرية لمدير النظام</span>
+            <div className="bg-[#0b1720] w-full max-w-md rounded-2xl border border-amber-500/50 shadow-2xl p-6 space-y-4 animate-in zoom-in-95 duration-150 text-xs text-stone-200">
+              {/* Modal Header */}
+              <div className="flex items-center justify-between border-b border-stone-800 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                    <Settings className="w-5 h-5 animate-spin [animation-duration:12s]" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-amber-400">
+                      دخول الإدارة ولوحة التحكم
+                    </h3>
+                    <p className="text-[10px] text-stone-400">
+                      منطقة المشرف العام المعتمد لمنصة منهاج
+                    </p>
+                  </div>
                 </div>
-                <button onClick={() => setAdminModalOpen(false)} className="text-stone-400 hover:text-white">✕</button>
+                <button
+                  onClick={() => {
+                    setAdminModalOpen(false);
+                    setAdminError(null);
+                  }}
+                  className="p-1 rounded-lg text-stone-400 hover:text-white hover:bg-stone-800 transition-colors"
+                  aria-label="إغلاق"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
 
-              <p className="text-stone-300 text-[11px] leading-relaxed">
-                أدخل الرمز السري المكون من 6 أرقام (الافتراضي: <code className="bg-stone-950 px-1 py-0.5 rounded text-amber-400 font-mono">000000</code>) لفتح صلاحيات إدارة المنصة:
-              </p>
+              {/* Information Notice */}
+              <div className="p-3 rounded-xl bg-amber-950/30 border border-amber-500/30 text-stone-300 text-[11px] leading-relaxed flex items-start gap-2">
+                <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                <span>
+                  الدخول للوحة التحكم والإدارة مخصص حصرياً للمشرف العام عبر البريد المعتمد (<strong className="text-amber-300 font-mono">mohamedyoussef255@gmail.com</strong>) وكلمة المرور الخاصة.
+                </span>
+              </div>
 
+              {/* Error Message */}
               {adminError && (
-                <div className="p-2.5 rounded-lg bg-red-950/80 border border-red-700 text-red-300 text-[11px]">
-                  {adminError}
+                <div className="p-3 rounded-xl bg-red-950/90 border border-red-700 text-red-200 text-xs flex items-start gap-2 animate-in fade-in">
+                  <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                  <span>{adminError}</span>
                 </div>
               )}
 
-              <form onSubmit={handleAdminLogin} className="space-y-3">
-                <input
-                  type="password"
-                  autoFocus
-                  value={adminPasswordInput}
-                  onChange={(e) => setAdminPasswordInput(e.target.value)}
-                  placeholder="الرمز السري (مثلاً: 000000)"
-                  className="w-full bg-stone-950 border border-stone-700 rounded-xl p-3 text-center text-amber-400 font-mono tracking-widest text-lg focus:outline-none focus:border-amber-500"
-                />
+              {/* Login Form */}
+              <form onSubmit={handleAdminLogin} className="space-y-3.5">
+                {/* Email Field */}
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-stone-300 flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5 text-amber-400" />
+                    <span>البريد الإلكتروني المعتمد للمشرف:</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="admin-login-email-input"
+                      type="email"
+                      required
+                      autoFocus
+                      dir="ltr"
+                      value={adminEmailInput}
+                      onChange={(e) => setAdminEmailInput(e.target.value)}
+                      placeholder="mohamedyoussef255@gmail.com"
+                      className="w-full bg-[#061017] border border-stone-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 rounded-xl px-3 py-2.5 text-amber-300 font-mono text-xs outline-none transition-all"
+                    />
+                  </div>
+                </div>
 
-                <div className="flex gap-2">
+                {/* Password Field */}
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-stone-300 flex items-center gap-1.5">
+                    <KeyRound className="w-3.5 h-3.5 text-amber-400" />
+                    <span>كلمة المرور الإدارية:</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="admin-login-password-input"
+                      type={showAdminPassword ? 'text' : 'password'}
+                      required
+                      dir="ltr"
+                      value={adminPasswordInput}
+                      onChange={(e) => setAdminPasswordInput(e.target.value)}
+                      placeholder="كلمة المرور"
+                      className="w-full bg-[#061017] border border-stone-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 rounded-xl px-3 py-2.5 text-amber-300 font-mono text-xs outline-none transition-all pl-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowAdminPassword(!showAdminPassword)}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-amber-300 transition-colors"
+                      title={showAdminPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                    >
+                      {showAdminPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="pt-2 flex flex-col sm:flex-row gap-2">
                   <button
+                    id="admin-login-submit-btn"
                     type="submit"
-                    className="flex-1 py-2.5 bg-amber-500 hover:bg-amber-400 text-stone-950 font-black rounded-xl transition-colors shadow-lg"
+                    className="flex-1 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-stone-950 font-black rounded-xl transition-all shadow-lg flex items-center justify-center gap-2"
                   >
-                    دخول لوحة التحكم
+                    <Settings className="w-4 h-4" />
+                    <span>دخول لوحة التحكم</span>
                   </button>
                   <button
+                    id="admin-login-autofill-btn"
                     type="button"
                     onClick={() => {
-                      setAdminPasswordInput('000000');
+                      setAdminEmailInput('mohamedyoussef255@gmail.com');
+                      setAdminPasswordInput('mohamed2072');
+                      setAdminError(null);
                     }}
-                    className="px-3 py-2 bg-stone-800 text-stone-300 hover:bg-stone-700 rounded-xl font-mono text-[11px]"
+                    className="px-3 py-2.5 bg-stone-800 hover:bg-stone-700 text-stone-300 rounded-xl font-medium text-[11px] transition-colors flex items-center justify-center gap-1.5"
+                    title="تعبئة البريد وكلمة السر المعتمدة تلقائياً"
                   >
-                    تعبئة 000000
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                    <span>تعبئة البيانات المعتمدة</span>
                   </button>
                 </div>
               </form>

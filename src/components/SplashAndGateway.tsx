@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, Moon, Sun, Lock, Sparkles, ChevronLeft, Heart, BookOpen, Users, Languages } from 'lucide-react';
+import { ShieldCheck, Moon, Sun, Lock, Sparkles, ChevronLeft, Heart, BookOpen, Users, Languages, Settings } from 'lucide-react';
 import { MinhajOfficialLogo } from './MinhajOfficialLogo';
 import { ColorPaletteBar } from './ColorPaletteBar';
 import { ColorPaletteId } from '../data/colorPalettes';
@@ -110,6 +110,22 @@ export function SplashAndGateway({
             title={isDark ? 'تفعيل الوضع النهاري' : 'تفعيل الوضع الليلي'}
           >
             {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
+
+          {/* ⚙️ Admin Control Panel Settings Gear (تروس الإعدادات للإدارة) */}
+          <button
+            id="splash-admin-settings-btn"
+            type="button"
+            onClick={onAdminClick}
+            className={`p-2 rounded-xl border transition-all duration-200 group flex items-center gap-1 ${
+              isDark
+                ? 'bg-[#0b212c] text-amber-400 border-[#164e63] hover:bg-[#0e2c3b] hover:border-amber-400/60'
+                : 'bg-white text-[#0c3e54] border-[#cde2ec] hover:text-amber-600 hover:bg-[#f0f7fa] shadow-sm'
+            }`}
+            title="لوحة الإدارة والتحكم (للمشرف العام)"
+            aria-label="لوحة الإدارة والتحكم"
+          >
+            <Settings className="w-4 h-4 text-amber-400 group-hover:rotate-90 transition-transform duration-300" />
           </button>
         </div>
       </header>
