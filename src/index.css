@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+:root {
+  --theme-primary: #0c3e54;
+  --theme-secondary: #0891b2;
+  --theme-accent: #d4af37;
+  --theme-bg-root: #f0f7fa;
+  --theme-bg-card: #ffffff;
+  --theme-bg-header: #ffffff;
+  --theme-border: #cfe0ea;
+  --theme-text-primary: #0a2737;
+  --theme-text-secondary: #164359;
+}
+
+@layer utilities {
+  .font-quran {
+    font-family: 'Amiri', serif;
+  }
+
+  /* Dynamic CSS variable utilities */
+  .bg-theme-root {
+    background-color: var(--theme-bg-root);
+  }
+  .bg-theme-card {
+    background-color: var(--theme-bg-card);
+  }
+  .bg-theme-header {
+    background-color: var(--theme-bg-header);
+  }
+  .border-theme {
+    border-color: var(--theme-border);
+  }
+  .text-theme-primary {
+    color: var(--theme-text-primary);
+  }
+  .text-theme-secondary {
+    color: var(--theme-text-secondary);
+  }
+  .text-theme-accent {
+    color: var(--theme-accent);
+  }
+
+  /* Islamic geometric subtle watermark pattern echoing the official Minhaj logo */
+  .bg-islamic-pattern-light {
+    background-color: var(--theme-bg-root, #f4f8fa);
+    background-image: radial-gradient(var(--theme-secondary, #0891b2) 0.75px, transparent 0.75px), radial-gradient(var(--theme-accent, #d4af37) 0.75px, var(--theme-bg-root, #f4f8fa) 0.75px);
+    background-size: 30px 30px;
+    background-position: 0 0, 15px 15px;
+  }
+
+  .bg-islamic-pattern-dark {
+    background-color: var(--theme-bg-root, #06141c);
+    background-image: radial-gradient(var(--theme-secondary, #0891b2) 0.85px, transparent 0.85px), radial-gradient(var(--theme-accent, #d4af37) 0.85px, var(--theme-bg-root, #06141c) 0.85px);
+    background-size: 30px 30px;
+    background-position: 0 0, 15px 15px;
+  }
+}
+
+/* Custom smooth scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--theme-secondary, #0891b2);
+  border-radius: 9999px;
+  opacity: 0.5;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--theme-accent, #d4af37);
+}
+

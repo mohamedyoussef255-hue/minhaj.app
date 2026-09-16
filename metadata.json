@@ -1,0 +1,10 @@
+{
+  "name": "منهاج | Minhaj - منصة التحفيظ والزواج الشرعي",
+  "description": "منصة إسلامية متكاملة لتحفيظ القرآن الكريم والزواج الشرعي بنظام العزل التام وحماية التواصل والذكاء الاصطناعي",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
